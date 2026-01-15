@@ -142,8 +142,8 @@ const App: React.FC = () => {
     setTransactions(getTransactions());
     setCategories(getCategories());
     
-    // 强化 API Key 检测逻辑
-    const key = process.env.API_KEY;
+    // 检查 API Key 状态，确保不会因为变量缺失导致应用白屏
+    const key = (window as any).process?.env?.API_KEY || process.env.API_KEY;
     const isMissing = !key || key === 'undefined' || key === 'null' || key.trim().length < 5;
     setApiKeyMissing(isMissing);
     
@@ -159,13 +159,11 @@ const App: React.FC = () => {
   }), [transactions, selectedDate]);
   const availableYears = useMemo(() => getAvailableYears(transactions), [transactions]);
 
-  // Fix: Added handleSaveTransaction to fix missing name error
   const handleSaveTransaction = (t: Transaction) => {
     const updated = saveTransaction(t);
     setTransactions(updated);
   };
 
-  // Fix: Added handleDeleteTransaction to fix missing name error
   const handleDeleteTransaction = (id: string) => {
     const updated = deleteTransaction(id);
     setTransactions(updated);
@@ -193,7 +191,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Fix: Cast Object.entries result to resolve 'unknown' vs 'number' comparison error
   const pieData = (Object.entries(dashboardStats.categoryBreakdown) as [string, number][])
     .filter(([_, value]) => value > 0)
     .map(([name, value]) => ({ name, value }));
@@ -211,7 +208,7 @@ const App: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-serif font-bold tracking-tight" style={{ color: themeColor }}>这日子还过吗</h1>
-            <button onClick={() => setShowColorPicker(true)} className="p-1.5 rounded-full hover:bg-black/5"><Palette size={16} style={{ color: themeColor, opacity: 0.8 }} /></button>
+            <button onClick={() => setShowColorPicker(!showColorPicker)} className="p-1.5 rounded-full hover:bg-black/5"><Palette size={16} style={{ color: themeColor, opacity: 0.8 }} /></button>
           </div>
           <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-medium">Rational • Long-term</p>
         </div>
@@ -257,7 +254,6 @@ const App: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-center"><div><div className="text-[10px] text-gray-400 uppercase">Total</div><div className="font-serif font-bold text-gray-800 text-xl">{dashboardStats.totalExpense.toFixed(0)}</div></div></div>
                 </div>
                 <div className="mt-8 flex flex-wrap gap-2 justify-center">
-                    {/* Fix: pieData values are now typed as number from casted Object.entries above */}
                     {pieData.map((d) => (<div key={d.name} className="flex items-center gap-2 text-xs text-gray-600 bg-[#F2F0E9] px-3 py-1.5 rounded-full border border-black/5"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: MACRO_COLORS[d.name]}}></div><span className="font-medium">{d.name}</span><div className="flex items-center gap-1 pl-1 border-l border-gray-300 ml-1"><span className="font-bold">{(d.value / dashboardStats.totalExpense * 100).toFixed(0)}%</span>{getTrendIcon(dashboardStats.categoryBreakdown[d.name], prevDashboardStats.categoryBreakdown[d.name] || 0)}</div></div>))}
                 </div>
               </div>

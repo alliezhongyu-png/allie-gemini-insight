@@ -12,18 +12,17 @@ interface GenerateReportParams {
 }
 
 export const generateFinancialReport = async (params: GenerateReportParams): Promise<string> => {
-  const apiKey = process.env.API_KEY;
+  // 更加健壮的 Key 获取方式
+  const apiKey = (window as any).process?.env?.API_KEY || process.env.API_KEY;
   
-  if (!apiKey || apiKey === "undefined" || apiKey.length < 10) {
-    return "错误：API Key 未配置。请在 Netlify 环境变量中设置 API_KEY 并重新部署。";
+  if (!apiKey || apiKey === "undefined" || apiKey === "null" || apiKey.length < 10) {
+    return "错误：AI 分析师未能启动。请在部署平台的 Environment Variables 中检查 API_KEY 是否配置正确，并确保重新部署了站点。";
   }
 
   const ai = new GoogleGenAI({ apiKey });
   const { type, stats, prevStats, transactions, dateLabel, userContext } = params;
 
-  // 提取核心数据摘要
   const expenseTx = transactions.filter(t => t.type === 'EXPENSE');
-  const maxTx = expenseTx.length > 0 ? expenseTx.reduce((prev, current) => (prev.amount > current.amount) ? prev : current) : null;
   
   const sortedTransactions = [...transactions]
     .sort((a, b) => b.amount - a.amount)
@@ -83,6 +82,6 @@ export const generateFinancialReport = async (params: GenerateReportParams): Pro
     return response.text || "AI 分析师暂时离线，请稍后再试。";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    return `分析失败：请确认 Netlify 环境变量 API_KEY 是否正确，以及网络是否畅通。`;
+    return `分析失败：请确认环境变量 API_KEY 是否生效（Netlify 需要 Trigger Deploy 才能应用新变量）。`;
   }
 };
