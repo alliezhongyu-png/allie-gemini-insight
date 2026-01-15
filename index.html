@@ -7,8 +7,11 @@
     <title>WealthGrows - 这日子还过吗</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // 确保全局 process 对象存在，防止代码执行到 process.env.API_KEY 时崩溃
-      window.process = window.process || { env: {} };
+      // 极其简化的垫片，仅在 process 未定义时初始化 env，避免代码崩溃
+      // 这样如果构建工具执行了全局替换 (process.env.API_KEY -> "your_key")，则不受影响
+      if (typeof window.process === 'undefined') {
+        window.process = { env: {} };
+      }
     </script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
@@ -62,6 +65,5 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
