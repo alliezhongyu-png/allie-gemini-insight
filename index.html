@@ -4,23 +4,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WealthGrows</title>
+    <title>WealthGrows - 这日子还过吗</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // 解决 Netlify/浏览器环境下 process.env 不存在导致的白屏问题
-      window.process = {
-        env: {
-          // 如果平台在构建时没有注入，这里提供初始值防止崩溃
-          API_KEY: "" 
-        }
-      };
+      // 确保全局 process 对象存在，防止代码执行到 process.env.API_KEY 时崩溃
+      window.process = window.process || { env: {} };
     </script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #F2F0E9; /* Warm Stone Background */
+        background-color: #F2F0E9;
         color: #1C1917;
       }
       
@@ -28,7 +23,6 @@
         font-family: 'Playfair Display', serif;
       }
 
-      /* Hide scrollbar for clean UI */
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
@@ -37,7 +31,6 @@
         scrollbar-width: none;
       }
 
-      /* Shake Animation for Edit Mode */
       @keyframes shake {
         0% { transform: rotate(0deg); }
         25% { transform: rotate(2deg); }
@@ -50,26 +43,24 @@
         animation: shake 0.2s ease-in-out infinite;
       }
       
-      /* Markdown basic styles for report */
       .prose h1, .prose h2, .prose h3 { font-family: 'Playfair Display', serif; margin-top: 1.2em; margin-bottom: 0.6em; font-weight: bold; }
       .prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
       .prose li { margin-bottom: 0.5em; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@^19.2.3",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
+        "recharts": "https://esm.sh/recharts@^3.6.0",
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+      }
+    }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

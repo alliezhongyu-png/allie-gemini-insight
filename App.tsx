@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Plus, Wallet, PieChart, Sparkles, TrendingUp, AlertCircle, ArrowUpRight, ArrowDownRight, ChevronDown, CalendarDays, FileText, Calendar, ArrowUp, ArrowDown, Palette, Check, X, Trash2 } from 'lucide-react';
+import { Plus, Wallet, Sparkles, TrendingUp, ArrowUpRight, ArrowDownRight, ChevronDown, Calendar, ArrowUp, ArrowDown, Palette, Trash2 } from 'lucide-react';
 import { ResponsiveContainer, PieChart as RechartsPie, Pie, Cell, Tooltip } from 'recharts';
-import { Transaction, MonthlyStats, MacroCategory, CategoryItem, TransactionType } from './types';
+import { Transaction, CategoryItem, TransactionType, MacroCategory } from './types';
 import { 
     getTransactions, saveTransaction, calculateMonthlyStats, deleteTransaction, 
     getAvailableYears, calculateYearlyStats, getPreviousMonthStats,
@@ -32,22 +32,16 @@ const DEFAULT_THEME_COLOR = '#1C1917';
 const hexToRgba = (hex: string, alpha: number) => {
   let r = 0, g = 0, b = 0;
   if (hex.length === 4) {
-    r = parseInt(hex[1] + hex[1], 16);
-    g = parseInt(hex[2] + hex[2], 16);
-    b = parseInt(hex[3] + hex[3], 16);
+    r = parseInt(hex[1] + hex[1], 16); g = parseInt(hex[2] + hex[2], 16); b = parseInt(hex[3] + hex[3], 16);
   } else if (hex.length === 7) {
-    r = parseInt(hex.slice(1, 3), 16);
-    g = parseInt(hex.slice(3, 5), 16);
-    b = parseInt(hex.slice(5, 7), 16);
+    r = parseInt(hex.slice(1, 3), 16); g = parseInt(hex.slice(3, 5), 16); b = parseInt(hex.slice(5, 7), 16);
   }
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 const getCategoryColor = (id: string) => {
   let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   return CATEGORY_ICON_COLORS[Math.abs(hash) % CATEGORY_ICON_COLORS.length];
 };
 
@@ -136,17 +130,10 @@ const App: React.FC = () => {
   const [userContext, setUserContext] = useState('');
   const [report, setReport] = useState<string | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
-  const [apiKeyMissing, setApiKeyMissing] = useState(false);
 
   useEffect(() => {
     setTransactions(getTransactions());
     setCategories(getCategories());
-    
-    // 检查 API Key 状态，确保不会因为变量缺失导致应用白屏
-    const key = (window as any).process?.env?.API_KEY || process.env.API_KEY;
-    const isMissing = !key || key === 'undefined' || key === 'null' || key.trim().length < 5;
-    setApiKeyMissing(isMissing);
-    
     const savedTheme = localStorage.getItem('wealthgrows_theme');
     if (savedTheme) setThemeColor(savedTheme);
   }, []);
@@ -157,7 +144,6 @@ const App: React.FC = () => {
       const d = new Date(t.date);
       return d.getMonth() === selectedDate.getMonth() && d.getFullYear() === selectedDate.getFullYear();
   }), [transactions, selectedDate]);
-  const availableYears = useMemo(() => getAvailableYears(transactions), [transactions]);
 
   const handleSaveTransaction = (t: Transaction) => {
     const updated = saveTransaction(t);
@@ -171,7 +157,6 @@ const App: React.FC = () => {
   };
 
   const handleGenerateReport = async () => {
-    if (apiKeyMissing) return;
     setLoadingReport(true);
     setReport(null); 
     try {
@@ -184,8 +169,8 @@ const App: React.FC = () => {
             transactions: relevantTx, dateLabel, userContext
         });
         setReport(result);
-    } catch (e) {
-        setReport("生成失败：请确认环境变量 API_KEY 已设置并在 Netlify 中重新部署。");
+    } catch (e: any) {
+        setReport(`生成失败：${e.message || "请求异常"}`);
     } finally {
         setLoadingReport(false);
     }
@@ -281,14 +266,7 @@ const App: React.FC = () => {
                    </div>
                    <textarea value={userContext} onChange={e => setUserContext(e.target.value)} placeholder="说说本月的大变动（如旅游、大病、意外之财）..." className="w-full bg-white rounded-2xl py-4 px-4 text-sm outline-none border border-gray-100 min-h-[100px] resize-none" />
                </div>
-                {apiKeyMissing ? (
-                    <div className="bg-amber-50 p-4 rounded-2xl flex items-start gap-3 border border-amber-100">
-                        <AlertCircle className="shrink-0 text-amber-500" size={20} />
-                        <div className="text-xs text-amber-800"><span className="font-bold block text-sm mb-1">API Key Missing</span>请在 Netlify 环境变量中设置 API_KEY 并重新部署。</div>
-                    </div>
-                ) : (
-                    <button onClick={handleGenerateReport} disabled={loadingReport} className="w-full text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-xl flex justify-center items-center gap-3" style={{ backgroundColor: themeColor }}>{loadingReport ? '分析中...' : <><Sparkles size={20} /> 生成诊断报告</>}</button>
-                )}
+               <button onClick={handleGenerateReport} disabled={loadingReport} className="w-full text-white font-bold py-4 rounded-2xl active:scale-95 transition-all shadow-xl flex justify-center items-center gap-3" style={{ backgroundColor: themeColor }}>{loadingReport ? '分析中...' : <><Sparkles size={20} /> 生成诊断报告</>}</button>
             </div>
             {report && (
                 <div className="bg-[#FDFCF8] rounded-[32px] p-8 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-700">
