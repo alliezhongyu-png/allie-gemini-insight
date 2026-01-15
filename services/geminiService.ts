@@ -21,7 +21,7 @@ export const generateFinancialReport = async (params: GenerateReportParams): Pro
            "排查步骤：\n" +
            "1. 检查 Netlify 面板中的变量名是否为 API_KEY。\n" +
            "2. 重要：前往 Deploys 页面，点击 'Trigger deploy' -> 'Clear cache and deploy site'。\n" +
-           "3. 如果您是在本地运行，请确保设置了相应的环境变量。";
+           "3. 如果您是在本地运行，请确保设置了相应的环境变量。"+apiKey;
   }
 
   const ai = new GoogleGenAI({ apiKey });
